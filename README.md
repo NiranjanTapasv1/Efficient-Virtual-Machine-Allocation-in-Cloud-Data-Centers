@@ -44,9 +44,6 @@ This solution is developed using C# and TypeScript. The key components include:
 
 Packing Solver (C#) – application/csharp/AWS.Prototyping.Pacman.Solver/src/AWS.Prototyping.Pacman.Solver
 
-This AWS Lambda function implements the packing algorithm for placing items into containers.
-The algorithm is based on the EB-AFIT packing method, initially developed as a master’s thesis by Erhan Baltacıoğlu at the U.S. Air Force Institute of Technology (AFIT) in 2001.
-Further details on this method can be found in the research paper: "The Distributor's Three-Dimensional Pallet-Packing Problem" published in the International Journal of Operational Research (2006, Volume 1, Issue 3).
 Shared Types (TypeScript) – application/typescript/packages/@aws-prototype/shared-types
 
 Defines data model objects shared between the API and front-end.
