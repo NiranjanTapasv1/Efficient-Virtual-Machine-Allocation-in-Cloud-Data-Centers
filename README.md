@@ -1,6 +1,6 @@
-# Bin Packing Solution
+# Efficient Virtual Machine Allocation in Cloud Data Centers
 
-The AWS Bin Packing Solution enables efficient packing of items into containers within a 3D space to optimize resource utilization.
+This solution focuses on optimizing the allocation of virtual machines (VMs) in cloud data centers, ensuring efficient resource utilization through advanced bin-packing strategies.
 
 
 
@@ -10,71 +10,70 @@ The AWS Bin Packing Solution enables efficient packing of items into containers 
 
 *Container Types*
 
-A container holds items and has specific dimensions. It may also include special features like refrigeration.
+A container represents a resource unit that holds virtual machines. It has predefined dimensions and may include specialized features such as high-performance computing or GPU acceleration.
 
-*Item Types*
+*Virtual Machine (VM) Types*
 
-An item type represents the objects that are packed into containers. Each item type has its own dimensions and may require specific container features (e.g., refrigeration).
+VMs represent computational units that require allocation within containers. Each VM has specific resource requirements, such as CPU, memory, and storage, and may need specialized container features.
 
-*Shipment*
+*Allocation Request*
 
-A shipment consists of items that need to be packed into containers. Users can specify item types and their respective quantities to be allocated across available containers.
+An allocation request defines the number and types of VMs that need to be assigned to containers. Users can specify VM types and their respective quantities for optimal distribution across available containers.
 
-*Manifest*
+*Allocation Plan*
 
-A manifest is generated for each shipment, detailing how items are packed within containers.
+An allocation plan is generated based on an allocation request, outlining how VMs are efficiently assigned to containers.
 
 ## Solution Architecture
 
 
 
-1. A single-page application hosted on Amazon S3, distributed via Amazon CloudFront.
-2. Amazon Cognito manages authentication and authorization for API access.
-3. Amazon API Gateway serves as a REST API to handle CRUD operations on data models.
-4. AWS Lambda proxy function executes CRUD operations and triggers the packing solver.
-5. Solver AWS Lambda function runs the bin-packing algorithm to determine an optimized packing solution, storing the results in Amazon DynamoDB. After optimization, the function retrieves a WebSocket connection 6. ID from DynamoDB and sends an update to the corresponding client.
-7. Bi-directional WebSocket API facilitates real-time updates for connected clients.
-8. Another AWS Lambda function links WebSocket connection IDs with client metadata for session tracking.
-9. Amazon DynamoDB serves as the storage layer for data objects and WebSocket metadata.
+1. A single-page application hosted on Amazon S3 and distributed through Amazon CloudFront for efficient content delivery.
+2. Amazon Cognito handles authentication and authorization to ensure secure access to APIs.
+3. Amazon API Gateway provides a REST API for managing VM allocation requests and processing CRUD operations.
+4. An AWS Lambda proxy function performs API operations and initiates the allocation solver.
+5. The solver AWS Lambda function runs a bin-packing algorithm to optimize VM allocation, storing results in Amazon DynamoDB. Once optimization is complete, it retrieves the WebSocket connection ID from DynamoDB and updates the corresponding client.
+6. A bi-directional WebSocket API enables real-time updates for connected clients.
+7. Another AWS Lambda function maps WebSocket connection IDs to client metadata for session tracking.
+8. Amazon DynamoDB serves as a scalable storage solution for VM allocation data and WebSocket metadata.
 
 
 ## Project Structure
 
-This solution is developed using C# and TypeScript. The key components include:
+This solution is developed using C# and TypeScript, with key components structured as follows:
 
-Packing Solver (C#) – application/csharp/AWS.Prototyping.Pacman.Solver/src/AWS.Prototyping.Pacman.Solver
+Allocation Solver (C#) – application/csharp/AWS.Prototyping.Pacman.Solver/src/AWS.Prototyping.Pacman.Solver
+Implements the core VM allocation logic using an advanced bin-packing algorithm.
 
-Shared Types (TypeScript) – application/typescript/packages/@aws-prototype/shared-types
+Shared Data Models (TypeScript) – application/typescript/packages/@aws-prototype/shared-types
+Defines data models shared between the backend API and the front-end application.
 
-Defines data model objects shared between the API and front-end.
-API (TypeScript) – application/typescript/packages/@aws-prototype/api
+API Layer (TypeScript) – application/typescript/packages/@aws-prototype/api
+Manages AWS Lambda proxy functions and REST API endpoints.
 
-Implements the AWS Lambda proxy function REST API.
-Subscription Handlers (TypeScript) – application/typescript/packages/@aws-prototype/subscription
+Event Handlers (TypeScript) – application/typescript/packages/@aws-prototype/subscription
+Handles real-time pub/sub communication between DynamoDB and WebSocket APIs.
 
-Manages pub/sub communication between DynamoDB and WebSocket APIs.
-Website (TypeScript & React.js) – application/typescript/packages/@aws-prototype/website
+User Interface (React.js & TypeScript) – application/typescript/packages/@aws-prototype/website
+Provides an interactive front-end for managing VM allocation requests and viewing results.
 
-A React.js-based demo front-end for user interaction.
-Infrastructure (TypeScript & AWS CDK) – application/typescript/packages/@aws-prototype/infra
-
-Contains Infrastructure as Code (IaC) required for deployment using AWS CDK.
-
+Infrastructure as Code (AWS CDK & TypeScript) – application/typescript/packages/@aws-prototype/infra
+Defines cloud infrastructure using AWS Cloud Development Kit (CDK).
 
 ## Build
 
 ### Prerequisites
 
-Ensure the following dependencies are installed and available in your system PATH:
+Ensure the following dependencies are installed and available in your system's PATH:
 
-node (version 14+)
+Node.js (version 14+)
 .NET 6.0
-yarn
-npx
+Yarn
+Npx
 Docker
 AWS CLI
 AWS CDK
-cfn-nag (install using gem install cfn-nag)
+cfn-nag (install via gem install cfn-nag)
 
 # Complete Build Instructions
 1) Build the Packing Solver (C# component)
@@ -97,7 +96,7 @@ Before deploying to a new AWS account, bootstrap it using the following command:
 ## Configuration
 
 ### Pipeline Notifications
-
+CI/CD Pipeline Notifications
 To configure Slack notifications for the CI/CD pipeline, create a notifications.json file in the root directory of this repository and define the following structure:
 
 ```json
