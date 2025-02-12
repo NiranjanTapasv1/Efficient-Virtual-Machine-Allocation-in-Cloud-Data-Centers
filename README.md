@@ -1,102 +1,107 @@
 # Bin Packing Solution
 
-The AWS Bin Packing Solution provides you the ability to efficiently pack items into a container in a 3D space.
+The AWS Bin Packing Solution enables efficient packing of items into containers within a 3D space to optimize resource utilization.
 
-![Bin packed container](./docs/container.png)
 
-## Terms
+
+
+
+## Key Terminology
 
 *Container Types*
 
-A container has items that are packed into it. It has dimensions, and can have different features like refrigeration.
+A container holds items and has specific dimensions. It may also include special features like refrigeration.
 
 *Item Types*
 
-An item type defines items that are packed into containers. Item types have dimensions, and can optionally require the container that it is packed into to have specific features (e.g. refrigeration)
+An item type represents the objects that are packed into containers. Each item type has its own dimensions and may require specific container features (e.g., refrigeration).
 
 *Shipment*
 
-A shipment defines the items that need to be packed into containers. You can select item types and their quantities to be packed into a quantity of containers.
+A shipment consists of items that need to be packed into containers. Users can specify item types and their respective quantities to be allocated across available containers.
 
 *Manifest*
 
-One or more manifests are generated for a shipment, which shows which items have been packed into which containers.
+A manifest is generated for each shipment, detailing how items are packed within containers.
 
-## Architecture
+## Solution Architecture
 
-![Architecture](./docs/binpack-arch.png)
 
-1. Single application hosted on Amazon S3 fronted by Amazon CloudFront distribution
-2. Amazon Cognito provides authentication and authorization for the APIs
-3. API Gateway REST API for handling data model CRUD calls
-4. AWS Lambda proxy function performing CRUD, as well as starting the execution of the solver
-5. The solver AWS Lamba function runs the packing algorithm to get an optimal solution and writes the results to Amazon DynamoDB. After packing optimisation is done, it looks up the connection ID in Amazon DynamoDB and triggers an update to appropriate WebSocket connection.
-6. Bi-directional WebSocket API for handling of asynchronous updates to clients
-7. AWS Lambda function links the connection ID of the WebSocket connection with the client metadata
-8. Amazon DynamoDB stores data objects, as well as the metadata for websocket connections
+
+1. A single-page application hosted on Amazon S3, distributed via Amazon CloudFront.
+2. Amazon Cognito manages authentication and authorization for API access.
+3. Amazon API Gateway serves as a REST API to handle CRUD operations on data models.
+4. AWS Lambda proxy function executes CRUD operations and triggers the packing solver.
+5. Solver AWS Lambda function runs the bin-packing algorithm to determine an optimized packing solution, storing the results in Amazon DynamoDB. After optimization, the function retrieves a WebSocket connection 6. ID from DynamoDB and sends an update to the corresponding client.
+7. Bi-directional WebSocket API facilitates real-time updates for connected clients.
+8. Another AWS Lambda function links WebSocket connection IDs with client metadata for session tracking.
+9. Amazon DynamoDB serves as the storage layer for data objects and WebSocket metadata.
+
 
 ## Project Structure
 
-This solution uses 2 languages - C# and TypeScript. The components are:
+This solution is developed using C# and TypeScript. The key components include:
 
-- Packing Solver (C#) - `application/csharp/AWS.Prototyping.Pacman.Solver/src/AWS.Prototyping.Pacman.Solver`
+Packing Solver (C#) – application/csharp/AWS.Prototyping.Pacman.Solver/src/AWS.Prototyping.Pacman.Solver
 
-The packing solver contains the AWS Lambda function that handles the logic of packing items into containers. It is based off an implementation of the EB-AFIT packing algorithm originally developed as a master's thesis project by Erhan Baltacıoğlu (EB) at the U.S. Air Force Institute of Technology (AFIT) in 2001. This algorithm is also described in [The Distributor's Three-Dimensional Pallet-Packing Problem: A Human Intelligence-Based Heuristic Approach, by Erhan Baltacıoğlu, James T. Moore, and Raymond R. Hill Jr.](https://scholar.afit.edu/cgi/viewcontent.cgi?article=5567&context=etd), published in the International Journal of Operational Research in 2006 (volume 1, issue 3).
+This AWS Lambda function implements the packing algorithm for placing items into containers.
+The algorithm is based on the EB-AFIT packing method, initially developed as a master’s thesis by Erhan Baltacıoğlu at the U.S. Air Force Institute of Technology (AFIT) in 2001.
+Further details on this method can be found in the research paper: "The Distributor's Three-Dimensional Pallet-Packing Problem" published in the International Journal of Operational Research (2006, Volume 1, Issue 3).
+Shared Types (TypeScript) – application/typescript/packages/@aws-prototype/shared-types
 
-- Shared Types (TypeScript) - `application/typescript/packages/@aws-prototype/shared-types`
+Defines data model objects shared between the API and front-end.
+API (TypeScript) – application/typescript/packages/@aws-prototype/api
 
-Defines the data model objects that are shared between the API and front-end.
+Implements the AWS Lambda proxy function REST API.
+Subscription Handlers (TypeScript) – application/typescript/packages/@aws-prototype/subscription
 
-- API (TypeScript) - `application/typescript/packages/@aws-prototype/api`
+Manages pub/sub communication between DynamoDB and WebSocket APIs.
+Website (TypeScript & React.js) – application/typescript/packages/@aws-prototype/website
 
-Implementation of the AWS Lambda proxy function REST API.
+A React.js-based demo front-end for user interaction.
+Infrastructure (TypeScript & AWS CDK) – application/typescript/packages/@aws-prototype/infra
 
-- Subscription Handlers (TypeScript) - `application/typescript/packages/@aws-prototype/subscription`
+Contains Infrastructure as Code (IaC) required for deployment using AWS CDK.
 
-Provides pub/sub handling between DynamoDB and websocket APIs.
-
-- Website - `application/typescript/packages/@aws-prototype/website`
-
-React.js demo front-end.
-
-- Infra - `application/typescript/packages/@aws-prototype/website`
-
-Contains the infrastructure as code required to deploy the solution with AWS CDK.
 
 ## Build
 
 ### Prerequisites
 
-Ensure the following are installed and present on your PATH:
+Ensure the following dependencies are installed and available in your system PATH:
 
-- `node` (version 14 or above)
-- [`.NET 6.0`](https://dotnet.microsoft.com/en-us/download/dotnet/6.0)
-- `yarn`
-- `npx`
-- `Docker`
-- [`AWS CLI`](https://aws.amazon.com/cli/)
-- [`AWS CDK`](https://docs.aws.amazon.com/cdk/v2/guide/home.html)
-- `cfn-nag` (`gem install cfn-nag`)
+node (version 14+)
+.NET 6.0
+yarn
+npx
+Docker
+AWS CLI
+AWS CDK
+cfn-nag (install using gem install cfn-nag)
 
-### Build Instructions Complete Build
+# Complete Build Instructions
+1) Build the Packing Solver (C# component)
+   '''cd application/csharp/AWS.Prototyping.Pacman.Solver/src/AWS.Prototyping.Pacman.Solver  
+docker build '''.
 
-1) Navigate to `application/csharp/AWS.Prototyping.Pacman.Solver/src/AWS.Prototyping.Pacman.Solver` and run `docker build .`
+2) Build TypeScript Components
+  ''' cd application/typescript  
+yarn run build'''
+This command installs dependencies and builds all packages in the correct dependency order.
 
-2) Navigate to `application/typescript` and run: `yarn run build`.
-
-This will install the dependencies and build all packages in dependency order.
 
 ## Bootstrapping new accounts
 
-Be sure to run this command before planning to deploy to target accounts:
+Before deploying to a new AWS account, bootstrap it using the following command:
 
-```cdk bootstrap --profile <target account profile> --trust <pipeline account id> --cloudformation-execution-policies arn:aws:iam::aws:policy/AdministratorAccess```
+
+```cdk bootstrap --profile <target-account-profile> --trust <pipeline-account-id> --cloudformation-execution-policies arn:aws:iam::aws:policy/AdministratorAccess```
 
 ## Configuration
 
 ### Pipeline Notifications
 
-By creating a `notifications.json` file in the root directory of this repository, you can configure slack notifications for the CICD pipeline, eg:
+To configure Slack notifications for the CI/CD pipeline, create a notifications.json file in the root directory of this repository and define the following structure:
 
 ```json
 {
@@ -107,7 +112,13 @@ By creating a `notifications.json` file in the root directory of this repository
 ```
 
 ## Deployment
+Ensure you have met the AWS CDK prerequisites before proceeding.
 
-First, ensure you have followed the [AWS CDK prerequisites](https://docs.aws.amazon.com/cdk/v2/guide/getting_started.html) before starting deployment.
+To deploy the solution, navigate to the infrastructure directory and run:
+'''cd application/typescript/packages/@aws-prototype/infra  
+cdk deploy'''
 
-Navigate to `application/typescript/packages/@aws-prototype/infra` and run `cdk deploy`.
+This command will provision all necessary AWS resources and deploy the Bin Packing Solution to your AWS account.
+
+
+
